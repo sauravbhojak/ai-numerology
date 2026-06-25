@@ -1,0 +1,111 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Jost:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold: #D4AF37;
+  --gold-light: #E5C453;
+  --cosmic-deep: #121024;
+  --cosmic-purple: #1f153a;
+  --cosmic-black: #0A0915;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: radial-gradient(circle at 50% -20%, var(--cosmic-purple) 0%, var(--cosmic-deep) 30%, var(--cosmic-black) 80%);
+  background-attachment: fixed;
+  color: #D1D1D6;
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ── Glassmorphism ── */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-gold {
+  background: rgba(212, 175, 55, 0.06);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+/* ── Gold shimmer text ── */
+.text-shimmer {
+  background: linear-gradient(
+    90deg,
+    #d4af37 0%,
+    #f0d060 25%,
+    #b8962d 50%,
+    #f0d060 75%,
+    #d4af37 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+/* ── Star canvas behind everything ── */
+.star-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Content above stars ── */
+.content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Number card glow ── */
+.number-card:hover {
+  box-shadow:
+    0 0 30px rgba(212, 175, 55, 0.25),
+    0 0 60px rgba(212, 175, 55, 0.1);
+  transform: translateY(-4px);
+  border-color: rgba(212, 175, 55, 0.5);
+}
+
+.number-card {
+  transition: all 0.3s ease;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #050010; }
+::-webkit-scrollbar-thumb { background: #2d1b69; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #d4af37; }
+
+/* ── Sacred geometry spin ── */
+@keyframes spin-reverse {
+  from { transform: rotate(360deg); }
+  to   { transform: rotate(0deg); }
+}
+
+/* ── Input focus glow ── */
+.input-cosmic:focus {
+  outline: none;
+  border-color: rgba(212, 175, 55, 0.6);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+/* ── Particle pulse ── */
+@keyframes particle-float {
+  0%, 100% { transform: translateY(0) translateX(0); opacity: 0.6; }
+  33%       { transform: translateY(-30px) translateX(15px); opacity: 1; }
+  66%       { transform: translateY(-15px) translateX(-10px); opacity: 0.8; }
+}
