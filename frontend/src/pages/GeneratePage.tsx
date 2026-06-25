@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -40,13 +41,37 @@ const COUNTRIES = [
   "United Kingdom","United States","Vietnam","Zimbabwe",
 ].sort();
 
+const MONTHS = [
+  { val: "1", label: "Jan" }, { val: "2", label: "Feb" }, { val: "3", label: "Mar" },
+  { val: "4", label: "Apr" }, { val: "5", label: "May" }, { val: "6", label: "Jun" },
+  { val: "7", label: "Jul" }, { val: "8", label: "Aug" }, { val: "9", label: "Sep" },
+  { val: "10", label: "Oct" }, { val: "11", label: "Nov" }, { val: "12", label: "Dec" },
+];
+
+const DAYS = Array.from({ length: 31 }, (_, i) => String(i + 1));
+const currentYear = new Date().getFullYear();
+const YEARS = Array.from({ length: currentYear - 1920 + 1 }, (_, i) => String(currentYear - i));
+
 export default function GeneratePage() {
   const navigate = useNavigate();
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
+
+  const [dateParts, setDateParts] = useState({ month: "", day: "", year: "" });
+
+  const handleDateSelect = (field: "month" | "day" | "year", val: string) => {
+    const updated = { ...dateParts, [field]: val };
+    setDateParts(updated);
+    if (updated.year && updated.month && updated.day) {
+      setValue("dob", `${updated.year}-${updated.month.padStart(2, "0")}-${updated.day.padStart(2, "0")}`, { shouldValidate: true });
+    } else {
+      setValue("dob", "", { shouldValidate: true });
+    }
+  };
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -135,13 +160,44 @@ export default function GeneratePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm text-white/60 mb-2">Date of Birth *</label>
-                  <input
-                    id="dob"
-                    type="date"
-                    {...register("dob")}
-                    max={new Date().toISOString().split("T")[0]}
-                    className={`${inputClass} [color-scheme:dark]`}
-                  />
+                  <input type="hidden" {...register("dob")} />
+                  <div className="grid grid-cols-3 gap-2">
+                    <select
+                      aria-label="Month"
+                      value={dateParts.month}
+                      onChange={(e) => handleDateSelect("month", e.target.value)}
+                      className={inputClass}
+                    >
+                      <option value="" className="bg-cosmic-deep">Month</option>
+                      {MONTHS.map((m) => (
+                        <option key={m.val} value={m.val} className="bg-cosmic-deep">{m.label}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      aria-label="Day"
+                      value={dateParts.day}
+                      onChange={(e) => handleDateSelect("day", e.target.value)}
+                      className={inputClass}
+                    >
+                      <option value="" className="bg-cosmic-deep">Day</option>
+                      {DAYS.map((d) => (
+                        <option key={d} value={d} className="bg-cosmic-deep">{d}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      aria-label="Year"
+                      value={dateParts.year}
+                      onChange={(e) => handleDateSelect("year", e.target.value)}
+                      className={inputClass}
+                    >
+                      <option value="" className="bg-cosmic-deep">Year</option>
+                      {YEARS.map((y) => (
+                        <option key={y} value={y} className="bg-cosmic-deep">{y}</option>
+                      ))}
+                    </select>
+                  </div>
                   {errors.dob && (
                     <p className="text-red-400 text-xs mt-1">{errors.dob.message}</p>
                   )}
