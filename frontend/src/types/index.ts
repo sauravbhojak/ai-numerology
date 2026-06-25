@@ -11,6 +11,8 @@ export interface NumerologyNumbers {
   lucky_days: string[];
   lucky_categories: Record<string, string[]>;
   meanings: Record<string, string>;
+  name_optimizations?: string[];
+  lucky_handles?: string[];
 }
 
 export interface ReportResponse {

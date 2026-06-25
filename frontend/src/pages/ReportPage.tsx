@@ -146,7 +146,7 @@ export default function ReportPage() {
         </div>
 
         {/* ── Name Optimizations ── */}
-        {(numbers.name_optimizations?.length > 0 || numbers.lucky_handles?.length > 0) && (
+        {((numbers.name_optimizations?.length ?? 0) > 0 || (numbers.lucky_handles?.length ?? 0) > 0) && (
           <>
             <div className="flex items-center gap-4 mb-6">
               <h2 className="font-serif text-3xl font-bold text-shimmer">◈ Name Optimization</h2>
@@ -154,7 +154,7 @@ export default function ReportPage() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-              {numbers.name_optimizations?.length > 0 && (
+              {(numbers.name_optimizations?.length ?? 0) > 0 && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -173,7 +173,7 @@ export default function ReportPage() {
                       These mathematical variations of your name align perfectly with your Destiny Number's most fortunate frequency.
                     </p>
                     <div className="flex flex-col gap-3">
-                      {numbers.name_optimizations.map((name, i) => (
+                      {numbers.name_optimizations?.map((name: string, i: number) => (
                         <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-cosmic-gold/10 hover:border-cosmic-gold/30 transition-all cursor-default">
                           <span className="font-serif text-lg text-white">
                             <span className="text-cosmic-gold font-bold">{name}</span> {report.full_name.split(" ").slice(1).join(" ")}
@@ -186,7 +186,7 @@ export default function ReportPage() {
                 </motion.div>
               )}
               
-              {numbers.lucky_handles?.length > 0 && (
+              {(numbers.lucky_handles?.length ?? 0) > 0 && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -205,7 +205,7 @@ export default function ReportPage() {
                       These handles mathematically match your lucky numerology vibration, enhancing your digital presence.
                     </p>
                     <div className="flex flex-col gap-3">
-                      {numbers.lucky_handles.map((handle, i) => (
+                      {numbers.lucky_handles?.map((handle: string, i: number) => (
                         <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-[#9d4edd]/10 hover:border-[#9d4edd]/30 transition-all cursor-default">
                           <span className="font-mono text-base tracking-wide text-[#e0aaff]">
                             @{handle}
