@@ -12,31 +12,120 @@ import { downloadPdf } from "../services/api";
 import type { ReportResponse } from "../types";
 
 const AI_SECTION_ICONS: Record<string, string> = {
-  "Core Personality": "✨",
-  "Career & Professional Path": "💼",
-  "Relationships & Love Life": "💕",
-  "Strengths & Natural Gifts": "🌟",
-  "Challenges & Growth Areas": "🌱",
-  "Current Year Energy": "🌀",
-  "Spiritual Advice & Guidance": "🔮",
+  "core personality": "✨",
+  "career": "💼",
+  "professional": "💼",
+  "relationships": "💕",
+  "love": "💕",
+  "strengths": "🌟",
+  "natural gifts": "🌟",
+  "challenges": "🌱",
+  "growth": "🌱",
+  "current year": "🌀",
+  "personal year": "🌀",
+  "spiritual": "🔮",
+  "advice": "🔮",
+  "guidance": "🔮",
 };
 
 function parseAIResponse(text: string) {
   const sections: { heading: string; content: string }[] = [];
   const lines = text.split("\n");
-  let current: { heading: string; content: string } | null = null;
+  let current: { heading: string; content: string[] } | null = null;
 
   for (const line of lines) {
     const trimmed = line.trim();
     if (trimmed.startsWith("## ")) {
-      if (current) sections.push(current);
-      current = { heading: trimmed.replace(/^##\s*/, "").replace(/✨|💼|💕|🌟|🌱|🌀|🔮/g, "").trim(), content: "" };
-    } else if (current && trimmed) {
-      current.content += (current.content ? " " : "") + trimmed;
+      if (current) {
+        sections.push({ ...current, content: current.content.join("\n").trim() });
+      }
+      const rawHeading = trimmed.replace(/^##\s*/, "").trim();
+      const cleanHeading = rawHeading.replace(/✨|💼|💕|🌟|🌱|🌀|🔮|✦|★|☆|💫/g, "").trim();
+      current = { heading: cleanHeading || rawHeading, content: [] };
+    } else if (current) {
+      current.content.push(line);
     }
   }
-  if (current) sections.push(current);
+  if (current) {
+    sections.push({ ...current, content: current.content.join("\n").trim() });
+  }
   return sections;
+}
+
+function renderInlineFormatting(line: string) {
+  const parts = line.split(/(\*\*.*?\*\*|__.*?__)/g);
+  return parts.map((part, i) => {
+    if ((part.startsWith("**") && part.endsWith("**")) || (part.startsWith("__") && part.endsWith("__"))) {
+      const inner = part.slice(2, -2);
+      return (
+        <span key={i} className="text-cosmic-gold font-semibold bg-cosmic-gold/10 px-2 py-0.5 rounded-md border border-cosmic-gold/25 shadow-[0_0_10px_rgba(212,175,55,0.15)] mx-0.5 inline-block">
+          {inner}
+        </span>
+      );
+    }
+    return part;
+  });
+}
+
+function RichText({ text }: { text: string }) {
+  if (!text) return null;
+  const lines = text.split(/\r?\n/);
+
+  const elements: React.ReactNode[] = [];
+  let currentParagraph: string[] = [];
+
+  const flushParagraph = () => {
+    if (currentParagraph.length > 0) {
+      const joined = currentParagraph.join(" ").trim();
+      if (joined) {
+        elements.push(
+          <p key={`p-${elements.length}`} className="text-[#D1D1D6]/90 leading-relaxed text-base sm:text-lg font-light mb-5 tracking-wide">
+            {renderInlineFormatting(joined)}
+          </p>
+        );
+      }
+      currentParagraph = [];
+    }
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) {
+      flushParagraph();
+      continue;
+    }
+
+    if (line.startsWith("### ") || line.startsWith("#### ")) {
+      flushParagraph();
+      const headerText = line.replace(/^#{3,4}\s*/, "");
+      elements.push(
+        <h4 key={`h-${elements.length}`} className="font-serif text-lg sm:text-xl font-bold text-cosmic-gold mt-6 mb-3 flex items-center gap-2 border-l-2 border-cosmic-gold pl-3">
+          {renderInlineFormatting(headerText)}
+        </h4>
+      );
+      continue;
+    }
+
+    if (line.startsWith("- ") || line.startsWith("* ") || /^\d+\.\s/.test(line)) {
+      flushParagraph();
+      const bulletText = line.replace(/^(-\s|\*\s|\d+\.\s)/, "");
+      elements.push(
+        <div key={`li-${elements.length}`} className="flex items-start gap-3 pl-2 sm:pl-4 mb-3 group">
+          <span className="text-cosmic-gold mt-1 text-sm select-none group-hover:scale-125 transition-transform">✦</span>
+          <div className="text-[#D1D1D6]/90 text-base sm:text-lg leading-relaxed flex-1 font-light">
+            {renderInlineFormatting(bulletText)}
+          </div>
+        </div>
+      );
+      continue;
+    }
+
+    currentParagraph.push(line);
+  }
+
+  flushParagraph();
+
+  return <div className="space-y-1">{elements}</div>;
 }
 
 export default function ReportPage() {
@@ -221,35 +310,65 @@ export default function ReportPage() {
           </>
         )}
 
-        {/* ── AI Reading ── */}
-        <h2 className="font-serif text-3xl font-bold text-shimmer mb-6">◈ AI Numerology Reading</h2>
-        <div className="space-y-5 mb-12">
+        {/* ── AI Reading Section ── */}
+        <div className="flex items-center gap-4 mb-8">
+          <h2 className="font-serif text-3xl font-bold text-shimmer tracking-wide">◈ AI Numerology Reading</h2>
+          <div className="h-px bg-cosmic-gold/30 flex-1"></div>
+        </div>
+
+        <div className="space-y-8 mb-16">
           {aiSections.length > 0 ? (
             aiSections.map((section, i) => {
-              const icon = Object.entries(AI_SECTION_ICONS).find(([k]) =>
-                section.heading.toLowerCase().includes(k.toLowerCase().split(" ")[0])
-              )?.[1] ?? "✦";
+              const iconKey = Object.keys(AI_SECTION_ICONS).find((k) =>
+                section.heading.toLowerCase().includes(k)
+              );
+              const icon = iconKey ? AI_SECTION_ICONS[iconKey] : "✦";
+
               return (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 + i * 0.08 }}
-                  className="glass rounded-2xl p-6 border border-white/5"
+                  initial={{ opacity: 0, y: 25 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.07 }}
+                  className="glass-gold rounded-[28px] p-6 sm:p-10 border border-cosmic-gold/25 shadow-[0_15px_40px_rgba(0,0,0,0.5)] backdrop-blur-2xl relative overflow-hidden group hover:border-cosmic-gold/45 transition-all duration-500"
                 >
-                  <h3 className="font-serif text-xl font-bold text-cosmic-gold mb-3">
-                    {icon} {section.heading}
-                  </h3>
-                  <p className="text-white/70 leading-relaxed text-sm">{section.content}</p>
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cosmic-gold to-transparent opacity-40 group-hover:opacity-100 transition-opacity duration-500" />
+
+                  <div className="flex items-center gap-4 pb-5 mb-6 border-b border-white/10">
+                    <div className="text-2xl sm:text-3xl p-3 rounded-2xl bg-cosmic-gold/15 border border-cosmic-gold/30 shadow-[0_0_20px_rgba(212,175,55,0.2)] select-none">
+                      {icon}
+                    </div>
+                    <div>
+                      <span className="text-[11px] font-sans uppercase tracking-[0.25em] text-cosmic-gold font-semibold block mb-1">
+                        Chapter 0{i + 1}
+                      </span>
+                      <h3 className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-wide">
+                        {section.heading}
+                      </h3>
+                    </div>
+                  </div>
+
+                  <RichText text={section.content} />
                 </motion.div>
               );
             })
           ) : (
-            <div className="glass rounded-2xl p-8 border border-white/5">
-              <p className="text-white/60 leading-relaxed text-sm whitespace-pre-line">
-                {report.ai_response}
-              </p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass-gold rounded-[28px] p-8 sm:p-12 border border-cosmic-gold/25 shadow-2xl backdrop-blur-2xl"
+            >
+              <div className="flex items-center gap-4 pb-5 mb-6 border-b border-white/10">
+                <div className="text-3xl p-3 rounded-2xl bg-cosmic-gold/15 border border-cosmic-gold/30">
+                  ✨
+                </div>
+                <h3 className="font-serif text-3xl font-bold text-white tracking-wide">
+                  Complete Mystical Interpretation
+                </h3>
+              </div>
+              <RichText text={report.ai_response} />
+            </motion.div>
           )}
         </div>
 
