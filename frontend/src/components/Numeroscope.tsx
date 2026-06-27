@@ -68,29 +68,28 @@ export default function Numeroscope({ numbers }: NumeroscopeProps) {
           <circle cx="250" cy="250" r="180" fill="none" stroke="rgba(212,175,55,0.15)" strokeWidth="1" strokeDasharray="4 4" />
           <circle cx="250" cy="250" r="140" fill="none" stroke="rgba(212,175,55,0.05)" strokeWidth="0.5" />
           
-          {ITEMS.map((_, i) => {
-            // Rotated so first item is top
+          {ITEMS.map((item, i) => {
             const angle = (Math.PI * 2 * i) / ITEMS.length - Math.PI / 2;
-            const x = 250 + 180 * Math.cos(angle);
-            const y = 250 + 180 * Math.sin(angle);
+            const lineX = 250 + 180 * Math.cos(angle);
+            const lineY = 250 + 180 * Math.sin(angle);
             const isActive = i === activeIndex;
             return (
               <line
-                key={`line-${i}`}
+                key={item.id}
                 x1="250"
                 y1="250"
-                x2={x}
-                y2={y}
+                x2={lineX}
+                y2={lineY}
                 stroke={isActive ? "rgba(212,175,55,0.5)" : "rgba(212,175,55,0.1)"}
                 strokeWidth={isActive ? "1.5" : "0.5"}
-                className="transition-all duration-500"
+                className="transition-[stroke,stroke-width] duration-500"
               />
             );
           })}
         </svg>
 
         {/* Central HUD */}
-        <div className="absolute z-10 w-48 h-48 sm:w-64 sm:h-64 rounded-full flex flex-col items-center justify-center bg-[#050010] border border-cosmic-gold/20 shadow-[0_0_30px_rgba(0,0,0,0.8)]" style={{ willChange: 'transform' }}>
+        <div className="absolute z-10 w-48 h-48 sm:w-64 sm:h-64 rounded-full flex flex-col items-center justify-center bg-[#050010] border border-cosmic-gold/20 shadow-[0_0_30px_rgba(0,0,0,0.8)]" style={{ willChange: 'transform', transform: 'translate3d(0, 0, 0)', backfaceVisibility: 'hidden' }}>
           <AnimatePresence mode="wait">
             <motion.div
               key={activeItem.id}
@@ -130,8 +129,8 @@ export default function Numeroscope({ numbers }: NumeroscopeProps) {
             <motion.button
               key={item.id}
               onClick={() => setActiveIndex(i)}
-              className={`absolute z-20 flex flex-col items-center justify-center w-16 h-16 sm:w-20 sm:h-20 -ml-8 -mt-8 sm:-ml-10 sm:-mt-10 rounded-full glass border cursor-pointer transition-all duration-300
-                ${isActive ? `${s.border} ${s.glow} ${s.activeBg} scale-110` : 'border-white/10 hover:border-white/30 hover:bg-white/5 opacity-60 hover:opacity-100'}
+              className={`absolute z-20 flex flex-col items-center justify-center w-16 h-16 sm:w-20 sm:h-20 -ml-8 -mt-8 sm:-ml-10 sm:-mt-10 rounded-full glass border cursor-pointer transition-colors duration-300
+                ${isActive ? `${s.border} ${s.glow} ${s.activeBg}` : 'border-white/10 hover:border-white/30 hover:bg-white/5 opacity-60 hover:opacity-100'}
               `}
               style={{ left: x, top: y, willChange: 'transform, opacity' }}
               initial={{ opacity: 0, scale: 0 }}

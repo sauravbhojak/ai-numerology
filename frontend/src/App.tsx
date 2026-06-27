@@ -25,12 +25,12 @@ export default function App() {
         }}
       />
       {/* ── BACKGROUND ZODIAC WHEEL ── */}
-      <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden mix-blend-screen opacity-15" style={{ willChange: 'transform, opacity' }}>
+      <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden mix-blend-screen opacity-15" style={{ willChange: 'transform, opacity', transform: 'translate3d(0, 0, 0)', backfaceVisibility: 'hidden' }}>
         <img 
           src="/zodiac_wheel.png" 
           alt="Zodiac Chakra" 
           className="w-[900px] h-[900px] object-contain animate-spin-reverse"
-          style={{ willChange: 'transform' }}
+          style={{ willChange: 'transform', transform: 'translate3d(0, 0, 0)', backfaceVisibility: 'hidden' }}
         />
       </div>
       <Routes>

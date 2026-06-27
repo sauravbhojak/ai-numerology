@@ -142,6 +142,7 @@ export default function DailyPage() {
   };
 
   const onSubmit = async (data: FormData) => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
     const fullName = [data.first_name, data.middle_name, data.last_name].filter(Boolean).join(" ");
     
     // Save to localStorage
