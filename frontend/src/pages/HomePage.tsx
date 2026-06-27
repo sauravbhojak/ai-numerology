@@ -75,15 +75,7 @@ export default function HomePage() {
             </div>
           </motion.div>
 
-          {/* Scroll indicator */}
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="absolute bottom-8 text-white/20 text-sm flex flex-col items-center gap-2"
-          >
-            <span>Scroll to explore</span>
-            <div className="w-px h-8 bg-gradient-to-b from-white/20 to-transparent" />
-          </motion.div>
+
         </section>
 
         {/* ── FEATURES ────────────────────────────────── */}
