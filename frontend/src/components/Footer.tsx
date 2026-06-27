@@ -15,6 +15,8 @@ export default function Footer() {
           </p>
           <div className="flex gap-6 text-sm text-white/40">
             <Link to="/" className="hover:text-cosmic-gold transition-colors">Home</Link>
+            <Link to="/daily" className="hover:text-cosmic-gold transition-colors">Daily Forecast</Link>
+            <Link to="/blogs" className="hover:text-cosmic-gold transition-colors">Library</Link>
             <Link to="/generate" className="hover:text-cosmic-gold transition-colors">Generate Report</Link>
           </div>
           <p className="text-white/20 text-xs mt-4">

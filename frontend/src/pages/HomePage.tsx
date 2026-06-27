@@ -2,12 +2,13 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
   Sparkles, Star, Heart, Briefcase, Calendar,
-  Hash, Globe, Users, ChevronRight,
+  Hash, Globe, Users, ChevronRight, Clock,
 } from "lucide-react";
 import StarField from "../components/StarField";
 import FAQAccordion from "../components/FAQAccordion";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
+import { BLOG_POSTS } from "../data/blogs";
 
 const FEATURES = [
   { icon: Star,     title: "Life Path Number",      desc: "Discover your core life purpose and the path you are destined to walk." },
@@ -135,6 +136,58 @@ export default function HomePage() {
           </div>
         </section>
 
+
+        {/* ── FEATURED ARTICLES ────────────────────────── */}
+        <section className="py-24 px-6 max-w-6xl mx-auto border-t border-white/5">
+          <div className="text-center mb-16 flex flex-col items-center">
+            <span className="font-sans uppercase tracking-[0.2em] text-cosmic-gold text-xs font-semibold mb-4 block">Library</span>
+            <h2 className="font-serif text-3xl md:text-5xl font-normal text-shimmer mb-6 tracking-wide">
+              Featured Cosmic Wisdom
+            </h2>
+            <div className="w-12 h-px bg-cosmic-gold/50 mb-6"></div>
+            <p className="text-cosmic-silver/70 max-w-xl mx-auto font-sans font-light">
+              Expand your knowledge of spiritual frequencies, life cycles, and manifestation synchronicity.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            {BLOG_POSTS.slice(0, 3).map((post, i) => (
+              <motion.article
+                key={post.slug}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="glass rounded-3xl p-6 sm:p-8 border border-white/5 hover:border-cosmic-gold/25 transition-all group flex flex-col justify-between hover:shadow-[0_0_20px_rgba(212,175,55,0.1)] cursor-default"
+              >
+                <div>
+                  <span className="text-[10px] uppercase tracking-widest text-cosmic-gold font-semibold mb-3 block">
+                    {post.category}
+                  </span>
+                  <h3 className="text-white font-serif text-lg sm:text-xl font-normal mb-3 group-hover:text-cosmic-gold transition-colors duration-300">
+                    <Link to={`/blogs/${post.slug}`}>{post.title}</Link>
+                  </h3>
+                  <p className="text-white/40 text-sm leading-relaxed mb-6 font-sans font-light">
+                    {post.excerpt}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between border-t border-white/5 pt-4 text-[10px] text-white/35 font-sans font-medium">
+                  <span>{post.date}</span>
+                  <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{post.readTime}</span>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Link
+              to="/blogs"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-white/10 text-xs font-semibold uppercase tracking-wider hover:bg-white/5 text-white transition-colors"
+            >
+              Explore Full Library <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </section>
 
         {/* ── FAQ ─────────────────────────────────────── */}
         <section className="py-20 px-6 max-w-3xl mx-auto">
