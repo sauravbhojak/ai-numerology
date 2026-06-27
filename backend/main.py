@@ -24,9 +24,13 @@ app.add_middleware(
 app.include_router(report.router, prefix="/api/v1")
 
 
+import traceback
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    traceback.print_exc()
     return JSONResponse(
         status_code=500,
-        content={"detail": "An unexpected error occurred. Please try again."},
+        content={"detail": f"An unexpected error occurred: {str(exc)}"},
     )
+

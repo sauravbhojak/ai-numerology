@@ -3,7 +3,7 @@ import html
 from io import BytesIO
 from datetime import datetime
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.colors import HexColor, white, black
+from reportlab.lib.colors import HexColor
 from reportlab.lib.units import cm
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
@@ -30,8 +30,9 @@ def _styles() -> dict:
             textColor=GOLD,
             alignment=TA_CENTER,
             spaceAfter=6,
-            fontName="Helvetica-Bold",
+            fontName="Times-Bold",  # Serif style matching Cinzel
             leading=36,
+            keepWithNext=True,
         ),
         "subtitle": ParagraphStyle(
             "Subtitle",
@@ -48,8 +49,9 @@ def _styles() -> dict:
             textColor=GOLD,
             spaceAfter=8,
             spaceBefore=18,
-            fontName="Helvetica-Bold",
+            fontName="Times-Bold",  # Serif style matching Cinzel
             leading=20,
+            keepWithNext=True,
         ),
         "sub_header": ParagraphStyle(
             "SubHeader",
@@ -57,8 +59,9 @@ def _styles() -> dict:
             textColor=GOLD_LIGHT,
             spaceAfter=6,
             spaceBefore=12,
-            fontName="Helvetica-Bold",
+            fontName="Times-Bold",  # Serif style matching Cinzel
             leading=16,
+            keepWithNext=True,
         ),
         "body": ParagraphStyle(
             "Body",
@@ -80,7 +83,7 @@ def _styles() -> dict:
         "number_label": ParagraphStyle(
             "NumberLabel",
             fontSize=8.5,
-            textColor=SILVER_MUTED,
+            textColor=SILVER,  # Brighter color for high readability on dark background
             alignment=TA_CENTER,
             fontName="Helvetica",
             leading=11,
@@ -92,6 +95,22 @@ def _styles() -> dict:
             alignment=TA_CENTER,
             fontName="Helvetica-Bold",
             leading=26,
+        ),
+        "table_header_left": ParagraphStyle(
+            "TableHeaderLeft",
+            fontSize=11,
+            textColor=GOLD,
+            fontName="Times-Bold",
+            leading=14,
+            alignment=TA_LEFT,
+        ),
+        "table_body_left": ParagraphStyle(
+            "TableBodyLeft",
+            fontSize=10,
+            textColor=SILVER,
+            fontName="Helvetica",
+            leading=14,
+            alignment=TA_LEFT,
         ),
     }
 
@@ -113,13 +132,13 @@ def _draw_background(canvas, doc):
     canvas.setLineWidth(1.5)
     canvas.line(0, h - 2.4 * cm, w, h - 2.4 * cm)
 
-    # Header text
-    canvas.setFont("Helvetica-Bold", 9)
+    # Header text in Serif Times-Bold
+    canvas.setFont("Times-Bold", 9)
     canvas.setFillColor(GOLD)
     if doc.page == 1:
-        header_str = "✦  AI NUMEROLOGY • SACRED COSMIC BLUEPRINT  ✦"
+        header_str = "\u00bb  AI NUMEROLOGY  \u2022  SACRED COSMIC BLUEPRINT  \u00ab"
     else:
-        header_str = "✦  AI NUMEROLOGY • CONTINUED READING  ✦"
+        header_str = "\u00bb  AI NUMEROLOGY  \u2022  CONTINUED READING  \u00ab"
     canvas.drawCentredString(w / 2, h - 1.4 * cm, header_str)
 
     # 3. Bottom footer bar
@@ -168,7 +187,8 @@ def _number_table(numbers: dict, styles: dict) -> Table:
             row.append([""])
         cells.append(row)
 
-    table = Table(cells, colWidths=[4.5 * cm] * 4, rowHeights=[2.6 * cm] * len(cells))
+    # Remove fixed rowHeights to allow dynamic calculation and avoid overlaps
+    table = Table(cells, colWidths=[4.5 * cm] * 4)
     table.setStyle(
         TableStyle([
             ("BACKGROUND", (0, 0), (-1, -1), COSMIC_DEEP),
@@ -179,8 +199,8 @@ def _number_table(numbers: dict, styles: dict) -> Table:
             ("ROUNDEDCORNERS", [6]),
             ("LEFTPADDING", (0, 0), (-1, -1), 6),
             ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-            ("TOPPADDING", (0, 0), (-1, -1), 8),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+            ("TOPPADDING", (0, 0), (-1, -1), 10),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
         ])
     )
     return table
@@ -188,14 +208,14 @@ def _number_table(numbers: dict, styles: dict) -> Table:
 
 def _lucky_table(numbers: dict, styles: dict) -> Table:
     header = [
-        Paragraph("Lucky Numbers", styles["section_header"]),
-        Paragraph("Lucky Colors", styles["section_header"]),
-        Paragraph("Lucky Days", styles["section_header"]),
+        Paragraph("Lucky Numbers", styles["table_header_left"]),
+        Paragraph("Lucky Colors", styles["table_header_left"]),
+        Paragraph("Lucky Days", styles["table_header_left"]),
     ]
     values = [
-        Paragraph(", ".join(str(n) for n in numbers["lucky_numbers"]), styles["body"]),
-        Paragraph(", ".join(numbers["lucky_colors"]), styles["body"]),
-        Paragraph(", ".join(numbers["lucky_days"]), styles["body"]),
+        Paragraph(", ".join(str(n) for n in numbers["lucky_numbers"]), styles["table_body_left"]),
+        Paragraph(", ".join(numbers["lucky_colors"]), styles["table_body_left"]),
+        Paragraph(", ".join(numbers["lucky_days"]), styles["table_body_left"]),
     ]
     table = Table([header, values], colWidths=[6 * cm] * 3)
     table.setStyle(
@@ -224,6 +244,15 @@ def _format_markdown_inline(text: str) -> str:
     return clean
 
 
+def _clean_text(text: str) -> str:
+    # Strip emojis in range of miscellaneous symbols (2600-26FF), dingbats (2700-27BF), 
+    # and standard emojis/supplementary symbols (1F000-1F9FF)
+    text = re.sub(r"[\u2600-\u27bf]|[\U00010000-\U0010ffff]", "", text)
+    # Remove unsupported characters like ✦, ◈
+    text = text.replace("✦", "").replace("◈", "")
+    return text.strip()
+
+
 def _parse_ai_sections(ai_text: str, styles: dict) -> list:
     """Convert AI markdown response to luxury ReportLab flowable elements."""
     elements = []
@@ -235,26 +264,27 @@ def _parse_ai_sections(ai_text: str, styles: dict) -> list:
 
         if line.startswith("## ") or line.startswith("# "):
             raw_title = re.sub(r"^#{1,3}\s*", "", line).strip()
-            # Clean emojis that aren't supported by standard PDF fonts
-            clean_title = re.sub(r"[✨💼💕🌟🌱🌀🔮✦★☆💫🔢🎨📅]", "", raw_title).strip()
+            clean_title = _clean_text(raw_title)
             elements.append(Spacer(1, 12))
-            elements.append(Paragraph(f"✦   {clean_title.upper()}", styles["section_header"]))
+            elements.append(Paragraph(f'<font name="ZapfDingbats" color="#D4AF37">\u2726</font>  {clean_title.upper()}', styles["section_header"]))
             elements.append(HRFlowable(width="100%", thickness=0.75, color=GOLD, spaceAfter=8))
             continue
 
         if line.startswith("### ") or line.startswith("#### "):
             raw_sub = re.sub(r"^#{3,4}\s*", "", line).strip()
-            clean_sub = html.escape(raw_sub)
-            elements.append(Paragraph(f'<font color="#D4AF37">✦</font>  {clean_sub}', styles["sub_header"]))
+            clean_sub = html.escape(_clean_text(raw_sub))
+            elements.append(Paragraph(f'<font name="ZapfDingbats" color="#D4AF37">\u2727</font>  {clean_sub}', styles["sub_header"]))
             continue
 
-        if line.startswith("- ") or line.startsWith("* ") or re.match(r"^\d+\.\s", line):
+        if line.startswith("- ") or line.startswith("* ") or re.match(r"^\d+\.\s", line):
             bullet_content = re.sub(r"^(-\s|\*\s|\d+\.\s)", "", line).strip()
-            formatted = _format_markdown_inline(bullet_content)
-            elements.append(Paragraph(f'<font color="#D4AF37">✦</font>   {formatted}', styles["bullet_body"]))
+            clean_bullet = _clean_text(bullet_content)
+            formatted = _format_markdown_inline(clean_bullet)
+            elements.append(Paragraph(f'<font name="ZapfDingbats" color="#D4AF37">\u2726</font>   {formatted}', styles["bullet_body"]))
             continue
 
-        formatted_line = _format_markdown_inline(line)
+        clean_line = _clean_text(line)
+        formatted_line = _format_markdown_inline(clean_line)
         elements.append(Paragraph(formatted_line, styles["body"]))
 
     return elements
@@ -290,6 +320,7 @@ def generate_pdf(report_data: dict) -> bytes:
     gender = html.escape(report_data.get("gender", "")).title()
     country = html.escape(report_data.get("country", ""))
     gen_at = html.escape(report_data.get("generated_at", ""))
+    question = report_data.get("question", "")
 
     info_data = [
         [
@@ -305,28 +336,41 @@ def generate_pdf(report_data: dict) -> bytes:
             Paragraph('<b><font color="#D4AF37">Status:</font></b>  Confidential Reading', styles["body"]),
         ],
     ]
-    info_table = Table(info_data, colWidths=[9 * cm, 9 * cm])
-    info_table.setStyle(
-        TableStyle([
-            ("BACKGROUND", (0, 0), (-1, -1), COSMIC_DEEP),
-            ("BOX", (0, 0), (-1, -1), 1, GOLD),
-            ("GRID", (0, 0), (-1, -1), 0.5, COSMIC_PURPLE),
-            ("TOPPADDING", (0, 0), (-1, -1), 8),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
-            ("LEFTPADDING", (0, 0), (-1, -1), 12),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+
+    # Include specific user question in the personal details table if present
+    if question:
+        escaped_question = html.escape(question)
+        info_data.append([
+            Paragraph(f'<b><font color="#D4AF37">Question Asked:</font></b>  <i><font color="#D1D1D6">"{escaped_question}"</font></i>', styles["body"]),
+            ""
         ])
-    )
+
+    info_table = Table(info_data, colWidths=[9 * cm, 9 * cm])
+    
+    info_table_styles = [
+        ("BACKGROUND", (0, 0), (-1, -1), COSMIC_DEEP),
+        ("BOX", (0, 0), (-1, -1), 1, GOLD),
+        ("GRID", (0, 0), (-1, -1), 0.5, COSMIC_PURPLE),
+        ("TOPPADDING", (0, 0), (-1, -1), 8),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+        ("LEFTPADDING", (0, 0), (-1, -1), 12),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+    ]
+    if question:
+        info_table_styles.append(("SPAN", (0, 3), (1, 3)))
+
+    info_table.setStyle(TableStyle(info_table_styles))
     story.append(info_table)
     story.append(Spacer(1, 0.6 * cm))
 
     # ── Core Numbers ─────────────────────────────────────────
-    story.append(Paragraph("◈ Core Numerology Profile", styles["section_header"]))
+    story.append(Paragraph('<font name="Symbol" color="#D4AF37">\u2666</font>  Core Numerology Profile', styles["section_header"]))
     story.append(_number_table(report_data["numbers"], styles))
     story.append(Spacer(1, 0.6 * cm))
 
     # ── Number Meanings ──────────────────────────────────────
-    story.append(Paragraph("◈ Core Vibrational Meanings", styles["section_header"]))
+    story.append(Paragraph('<font name="Symbol" color="#D4AF37">\u2666</font>  Core Vibrational Meanings', styles["section_header"]))
     for key, meaning in report_data["numbers"]["meanings"].items():
         label = key.replace("_", " ").title()
         value = report_data["numbers"].get(key, "")
@@ -340,16 +384,17 @@ def generate_pdf(report_data: dict) -> bytes:
     story.append(Spacer(1, 0.6 * cm))
 
     # ── Lucky Section ────────────────────────────────────────
-    story.append(Paragraph("◈ Fortunate Attributes", styles["section_header"]))
+    story.append(Paragraph('<font name="Symbol" color="#D4AF37">\u2666</font>  Fortunate Attributes', styles["section_header"]))
     story.append(_lucky_table(report_data["numbers"], styles))
     story.append(Spacer(1, 0.6 * cm))
 
     # ── AI Interpretation ────────────────────────────────────
     story.append(HRFlowable(width="100%", thickness=1.5, color=GOLD, spaceBefore=8, spaceAfter=8))
-    story.append(Paragraph("◈ AI Mystical Synthesis & Guidance", styles["section_header"]))
+    story.append(Paragraph('<font name="Symbol" color="#D4AF37">\u2666</font>  AI Mystical Synthesis & Guidance', styles["section_header"]))
     story.extend(_parse_ai_sections(report_data.get("ai_response", ""), styles))
 
     # Attach page callbacks directly to build so ReportLab executes them
     doc.build(story, onFirstPage=_draw_background, onLaterPages=_draw_background)
     return buffer.getvalue()
+
 
