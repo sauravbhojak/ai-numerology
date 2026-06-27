@@ -177,7 +177,7 @@ export default function DailyPage() {
   const parsedSections = forecast ? parseDailyForecast(forecast.forecast) : [];
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-cosmic-black flex flex-col justify-between">
+    <div className="min-h-screen relative overflow-hidden flex flex-col justify-between">
       <StarField />
       <Navbar />
 
@@ -214,7 +214,7 @@ export default function DailyPage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.15 }}
-                className="glass rounded-[32px] p-6 sm:p-12 border border-cosmic-gold/20 shadow-[0_0_50px_rgba(0,0,0,0.6)] backdrop-blur-2xl relative"
+                className="glass rounded-[32px] p-6 sm:p-12 border border-cosmic-gold/20 shadow-[0_0_50px_rgba(0,0,0,0.6)] relative"
               >
                 <div className="absolute top-6 right-6 opacity-10 pointer-events-none hidden sm:block">
                   <SacredGeometry size={80} />
