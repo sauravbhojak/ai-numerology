@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { ReportFormData, ReportResponse } from "../types";
+import type { ReportFormData, ReportResponse, DailyForecastRequest, DailyForecastResponse } from "../types";
 
 const api = axios.create({
   baseURL: "/api/v1",
@@ -9,6 +9,9 @@ const api = axios.create({
 
 export const generateReport = (data: ReportFormData): Promise<{ data: ReportResponse }> =>
   api.post("/generate-report", data);
+
+export const getDailyForecast = (data: DailyForecastRequest): Promise<{ data: DailyForecastResponse }> =>
+  api.post("/daily-forecast", data);
 
 export const downloadPdf = async (reportData: ReportResponse): Promise<void> => {
   const response = await api.post("/download-pdf", reportData, {

@@ -4,6 +4,7 @@ import HomePage from "./pages/HomePage";
 import GeneratePage from "./pages/GeneratePage";
 import LoadingPage from "./pages/LoadingPage";
 import ReportPage from "./pages/ReportPage";
+import DailyPage from "./pages/DailyPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/generate" element={<GeneratePage />} />
         <Route path="/loading"  element={<LoadingPage />}  />
         <Route path="/report"   element={<ReportPage />}   />
+        <Route path="/daily"    element={<DailyPage />}    />
         <Route path="*"         element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>

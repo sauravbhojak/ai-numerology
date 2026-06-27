@@ -50,3 +50,17 @@ class NameTunerResponse(BaseModel):
     target_type: str
     lucky_numbers: List[int]
     variations: List[str]
+
+
+class DailyForecastRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=50)
+    dob: date
+    location: Optional[str] = Field(None, max_length=100)
+
+
+class DailyForecastResponse(BaseModel):
+    name: str
+    date: str
+    personal_day: int
+    meaning: str
+    forecast: str

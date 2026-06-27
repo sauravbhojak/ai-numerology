@@ -256,3 +256,30 @@ def calculate_all(
             "expression": get_number_meaning(expression),
         },
     }
+
+
+DAILY_MEANINGS: Dict[int, str] = {
+    1: "New Beginnings — A day for action, independence, and initiating new projects.",
+    2: "Cooperation & Balance — A day for listening, building relationships, and harmony.",
+    3: "Creative Expression — A day for communication, joy, social interactions, and art.",
+    4: "Structure & Foundation — A day for organization, focus, work, and discipline.",
+    5: "Freedom & Change — A day for adaptability, learning new things, and curiosity.",
+    6: "Nurturing & Responsibility — A day for home, family, caring, and duty.",
+    7: "Introspection & Wisdom — A day for quiet meditation, self-discovery, and analysis.",
+    8: "Power & Abundance — A day for business, material decisions, and personal empowerment.",
+    9: "Completion & Reflection — A day for letting go, finishing tasks, and compassion.",
+}
+
+
+def get_daily_meaning(n: int) -> str:
+    return DAILY_MEANINGS.get(n, "A day of alignment and cosmic flow")
+
+
+def calculate_personal_month(dob: date, target_date: date) -> int:
+    personal_year = reduce_number(dob.day + dob.month + target_date.year)
+    return reduce_number(personal_year + target_date.month)
+
+
+def calculate_personal_day(dob: date, target_date: date) -> int:
+    pm = calculate_personal_month(dob, target_date)
+    return reduce_number(pm + target_date.day)

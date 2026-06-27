@@ -35,3 +35,19 @@ export interface ReportFormData {
   country: string;
   question?: string;
 }
+
+
+export interface DailyForecastRequest {
+  name: string;
+  dob: string;
+  location?: string;
+}
+
+
+export interface DailyForecastResponse {
+  name: string;
+  date: string;
+  personal_day: number;
+  meaning: string;
+  forecast: string;
+}

@@ -47,6 +47,15 @@ export default function Navbar() {
             Home
           </Link>
           <Link
+            to="/daily"
+            className={`text-xs font-semibold uppercase tracking-[0.2em] transition-colors ${pathname === "/daily"
+              ? "text-cosmic-gold"
+              : "text-cosmic-silver hover:text-white"
+              }`}
+          >
+            Daily Forecast
+          </Link>
+          <Link
             to="/generate"
             className="text-xs font-semibold uppercase tracking-[0.15em] px-5 py-2.5 rounded-full glass-gold text-cosmic-gold border border-cosmic-gold/30 hover:border-cosmic-gold/80 transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.4)]"
           >

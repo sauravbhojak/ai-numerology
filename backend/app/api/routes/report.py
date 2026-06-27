@@ -3,10 +3,16 @@ from fastapi.responses import StreamingResponse
 from datetime import datetime
 from io import BytesIO
 
-from app.schemas.report import ReportRequest, ReportResponse, NumerologyNumbers
-from app.services.numerology import calculate_all
+from app.schemas.report import (
+    ReportRequest, ReportResponse, NumerologyNumbers,
+    DailyForecastRequest, DailyForecastResponse
+)
+from app.services.numerology import (
+    calculate_all, calculate_personal_day, get_daily_meaning
+)
 from app.services.ai_service import groq_service
 from app.prompts.numerology_prompt import build_numerology_prompt
+from app.prompts.daily_prompt import build_daily_prompt
 from app.pdf.report_builder import generate_pdf
 
 router = APIRouter(tags=["Reports"])
@@ -64,6 +70,38 @@ async def download_pdf(request: dict):
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+@router.post("/daily-forecast", response_model=DailyForecastResponse)
+async def daily_forecast(request: DailyForecastRequest):
+    """Calculate Personal Day and generate a daily forecast using AI."""
+    try:
+        today = datetime.now().date()
+        pd = calculate_personal_day(request.dob, today)
+        meaning = get_daily_meaning(pd)
+        
+        prompt = build_daily_prompt(
+            name=request.name,
+            dob=str(request.dob),
+            pd=pd,
+            meaning=meaning,
+            target_date=today.strftime("%B %d, %Y")
+        )
+        
+        forecast = await groq_service.get_interpretation(prompt)
+        
+        return DailyForecastResponse(
+            name=request.name,
+            date=today.strftime("%B %d, %Y"),
+            personal_day=pd,
+            meaning=meaning,
+            forecast=forecast
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate daily forecast: {str(e)}"
+        )
 
 
 @router.get("/health")
